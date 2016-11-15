@@ -1,15 +1,23 @@
 module HTTPDAVTest
   def propfind(url, properties = :all, opts = {})
+
+    puts "PROPFIND: Created name spaces."
+
     namespaces = {
       'DAV:' => 'D',
       'urn:ietf:params:xml:ns:carddav' => 'C',
       'http://calendarserver.org/ns/' => 'APPLE1'
     }
     
+
     if properties == :all
+      puts "If statement triggered"
+
       body = "<D:allprop />"
       
     else
+      puts "Else statement triggered"
+
       properties = properties.map do |(name, ns)|
         ns_short = namespaces[ns]
         raise "unknown namespace: #{ns}" unless ns_short
@@ -18,6 +26,8 @@ module HTTPDAVTest
       
       body = "<D:prop>#{properties.join("\n")}</D:prop>"
     end
+
+    puts "Successfully created body."
     
     
     data = <<-EOS
@@ -26,8 +36,14 @@ module HTTPDAVTest
   #{body}
 </D:propfind>
     EOS
+
+    puts "Creating params..."
+
+    params = opts.merge(input: data)
+
+    puts "Calling request with params: #{params}"
     
-    request('PROPFIND', url, opts.merge(input: data))
+    request('PROPFIND', url, params)
   end
   
   def ensure_element_exists(response, expr, namespaces = {'D' => 'DAV:'})
